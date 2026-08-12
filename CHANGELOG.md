@@ -1,3 +1,8 @@
+## 1.0.1
+
+- Updated package metadata with the GitHub repository information.
+- Minor package metadata improvements.
+
 ## 1.0.0
 
 - Initial release of `flutter_perspective_crop`.
