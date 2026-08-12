@@ -2,6 +2,7 @@ name: flutter_perspective_crop
 description: "A Flutter package for perspective image cropping with draggable corner handles, grid overlay, and homography-based perspective correction."
 version: 1.0.0
 homepage: https://github.com/natraj2512/flutter_perspective_crop
+repository: https://github.com/natraj2512/flutter_perspective_crop
 
 environment:
   sdk: ^3.9.2
