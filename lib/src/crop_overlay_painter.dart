@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 /// A [CustomPainter] that draws the image with a perspective crop overlay.
 ///
 /// Renders the source image, a dark overlay outside the crop region,
-/// draggable corner handles, connecting edges, and a 3×3 grid guide.
+/// 8 draggable handles (4 corners + 4 edge midpoints), connecting edges,
+/// and a 3×3 grid guide.
 class CropOverlayPainter extends CustomPainter {
   /// The source image to display.
   final ui.Image image;
@@ -16,7 +17,7 @@ class CropOverlayPainter extends CustomPainter {
   /// Converts a normalized offset to screen coordinates.
   final Offset Function(Offset) normalizedToScreen;
 
-  /// Index of the currently dragged corner, or -1 if none.
+  /// Index of the currently dragged handle (0–3 corners, 4–7 midpoints), or -1 if none.
   final int draggingIndex;
 
   /// Color of the dark overlay outside the crop area.
@@ -34,10 +35,10 @@ class CropOverlayPainter extends CustomPainter {
   /// Stroke width of the crop border.
   final double borderStrokeWidth;
 
-  /// Radius of corner handle circles.
+  /// Radius of handle circles.
   final double handleRadius;
 
-  /// Radius of corner handle circles when being dragged.
+  /// Radius of handle circles when being dragged.
   final double activeHandleRadius;
 
   CropOverlayPainter({
@@ -128,6 +129,33 @@ class CropOverlayPainter extends CustomPainter {
               ? activeHandleColor
               : borderColor.withValues(alpha: 0.8)
           ..strokeWidth = 1.5,
+      );
+    }
+
+    // Midpoint handles (indices 4–7: top, right, bottom, left edges)
+    final midpoints = <Offset>[
+      _lerp(screenCorners[0], screenCorners[1], 0.5), // top edge
+      _lerp(screenCorners[1], screenCorners[2], 0.5), // right edge
+      _lerp(screenCorners[2], screenCorners[3], 0.5), // bottom edge
+      _lerp(screenCorners[3], screenCorners[0], 0.5), // left edge
+    ];
+
+    for (int i = 0; i < midpoints.length; i++) {
+      final handleIndex = 4 + i;
+      final isDragging = handleIndex == draggingIndex;
+
+      canvas.drawCircle(
+        midpoints[i],
+        isDragging ? activeHandleRadius : handleRadius,
+        Paint()
+          ..color = isDragging ? activeHandleColor : borderColor
+          ..style = PaintingStyle.fill,
+      );
+
+      canvas.drawCircle(
+        midpoints[i],
+        4,
+        Paint()..color = Colors.black,
       );
     }
 

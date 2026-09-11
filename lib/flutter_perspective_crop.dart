@@ -1,5 +1,6 @@
 /// A Flutter package for perspective image cropping with draggable corner
-/// handles, grid overlay, and homography-based perspective correction.
+/// handles, edge midpoint handles, grid overlay, and homography-based
+/// perspective correction.
 ///
 /// ## Quick start
 ///

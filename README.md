@@ -1,12 +1,12 @@
 # flutter_perspective_crop
 
-A Flutter package for perspective image cropping with draggable corner handles, grid overlay, and homography-based perspective correction.
+A Flutter package for perspective image cropping with draggable corner and midpoint handles, grid overlay, and homography-based perspective correction.
 
 ## Features
 
-- **Perspective crop** — Drag four corner handles to define an arbitrary quadrilateral crop region
+- **Perspective crop** — Drag four corner handles and four midpoint handles to define an arbitrary quadrilateral crop region
 - **Homography-based transform** — Uses projective (perspective) mapping via a subdivided triangle mesh for accurate results
-- **Interactive UI** — Real-time preview with dark overlay, crop border, and 3×3 grid guide
+- **Interactive UI** — Real-time preview with dark overlay, crop border, 8 handles (4 corners + 4 midpoints), and 3×3 grid guide
 - **Fully customizable** — Colors, handle sizes, labels, padding, and more are configurable via constructor parameters
 - **Simple API** — Navigate to `PerspectiveCropPage` and receive the cropped image file path on pop
 
@@ -121,7 +121,7 @@ Future<ui.Image?> cropImage(ui.Image source, List<Offset> corners) {
 | `cropLabel` | `String` | `'Crop'` | Crop button label |
 | `cropButtonColor` | `Color` | `Colors.white` | Crop button background |
 | `cropButtonForegroundColor` | `Color` | `Colors.black` | Crop button text color |
-| `handleRadius` | `double` | `12.0` | Corner handle radius |
+| `handleRadius` | `double` | `12.0` | Handle radius |
 | `activeHandleRadius` | `double` | `16.0` | Active handle radius |
 | `overlayColor` | `Color` | `Color(0x99000000)` | Overlay outside crop |
 | `borderColor` | `Color` | `Colors.white` | Border & handle color |
@@ -139,7 +139,7 @@ Future<ui.Image?> cropImage(ui.Image source, List<Offset> corners) {
 
 ### CropOverlayPainter
 
-A `CustomPainter` that renders the image with the crop overlay. Accepts all visual customization parameters.
+A `CustomPainter` that renders the image with the crop overlay. Draws 8 handles (4 corners + 4 edge midpoints) as circles with inner dots. Accepts all visual customization parameters.
 
 ## Additional information
 

@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'crop_overlay_painter.dart';
 import 'perspective_crop_engine.dart';
 
-/// A page that lets the user crop an image by adjusting four corner handles.
+/// A page that lets the user crop an image by adjusting corner and midpoint handles.
 ///
 /// Returns the file path of the cropped image via [Navigator.pop].
 ///
@@ -55,10 +55,10 @@ class PerspectiveCropPage extends StatefulWidget {
   /// Color of the crop button foreground (text/icon).
   final Color cropButtonForegroundColor;
 
-  /// Radius for the corner handles in the crop overlay.
+  /// Radius for the handles in the crop overlay.
   final double handleRadius;
 
-  /// Radius for the active (dragged) corner handle.
+  /// Radius for the active (dragged) handle.
   final double activeHandleRadius;
 
   /// Color of the dark overlay outside the crop area.
@@ -73,7 +73,7 @@ class PerspectiveCropPage extends StatefulWidget {
   /// Color of the grid lines inside the crop area.
   final Color gridColor;
 
-  /// Maximum touch distance (in logical pixels) to grab a corner handle.
+  /// Maximum touch distance (in logical pixels) to grab a handle.
   final double touchSlop;
 
   /// Callback invoked when the crop operation fails.
@@ -115,7 +115,8 @@ class _PerspectiveCropPageState extends State<PerspectiveCropPage> {
   // The 4 corner points (normalized 0.0 - 1.0 relative to image display area)
   late List<Offset> _corners;
 
-  // Index of the corner being dragged, -1 if none
+  // Index of the handle being dragged, -1 if none
+  // 0-3: corners, 4-7: midpoints (top, right, bottom, left)
   int _draggingCornerIndex = -1;
 
   // Size of the displayed image within the screen
@@ -260,12 +261,31 @@ class _PerspectiveCropPageState extends State<PerspectiveCropPage> {
     double minDist = double.infinity;
     int closestIndex = -1;
 
+    // Check corner handles (indices 0–3)
     for (int i = 0; i < _corners.length; i++) {
       final screenPos = _normalizedToScreen(_corners[i]);
       final dist = (touchPos - screenPos).distance;
       if (dist < minDist && dist < widget.touchSlop) {
         minDist = dist;
         closestIndex = i;
+      }
+    }
+
+    // Check midpoint handles (indices 4–7: top, right, bottom, left)
+    for (int i = 0; i < _corners.length; i++) {
+      final nextIndex = (i + 1) % _corners.length;
+      final midScreen = Offset(
+        (_normalizedToScreen(_corners[i]).dx +
+                _normalizedToScreen(_corners[nextIndex]).dx) /
+            2,
+        (_normalizedToScreen(_corners[i]).dy +
+                _normalizedToScreen(_corners[nextIndex]).dy) /
+            2,
+      );
+      final dist = (touchPos - midScreen).distance;
+      if (dist < minDist && dist < widget.touchSlop) {
+        minDist = dist;
+        closestIndex = 4 + i;
       }
     }
 
@@ -278,8 +298,31 @@ class _PerspectiveCropPageState extends State<PerspectiveCropPage> {
     if (_draggingCornerIndex < 0) return;
 
     setState(() {
-      _corners[_draggingCornerIndex] =
-          _screenToNormalized(details.localPosition);
+      final newPos = _screenToNormalized(details.localPosition);
+
+      if (_draggingCornerIndex < 4) {
+        // Dragging a corner handle
+        _corners[_draggingCornerIndex] = newPos;
+      } else {
+        // Dragging a midpoint handle — move both adjacent corners by the delta
+        final midIndex = _draggingCornerIndex - 4;
+        final nextIndex = (midIndex + 1) % _corners.length;
+
+        final currentMid = Offset(
+          (_corners[midIndex].dx + _corners[nextIndex].dx) / 2,
+          (_corners[midIndex].dy + _corners[nextIndex].dy) / 2,
+        );
+        final delta = newPos - currentMid;
+
+        _corners[midIndex] = Offset(
+          (_corners[midIndex].dx + delta.dx).clamp(0.0, 1.0),
+          (_corners[midIndex].dy + delta.dy).clamp(0.0, 1.0),
+        );
+        _corners[nextIndex] = Offset(
+          (_corners[nextIndex].dx + delta.dx).clamp(0.0, 1.0),
+          (_corners[nextIndex].dy + delta.dy).clamp(0.0, 1.0),
+        );
+      }
     });
   }
 

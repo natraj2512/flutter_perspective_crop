@@ -1,3 +1,10 @@
+## 1.1.0
+
+- Added 8 draggable handles: 4 corner handles + 4 edge midpoint handles.
+- Midpoint handles use the same circle style as corner handles (`handleRadius`, `activeHandleRadius`, inner black dot).
+- Dragging a midpoint handle moves both adjacent corners together to preserve the edge.
+- Updated docs to reflect the new handle system.
+
 ## 1.0.1
 
 - Updated package metadata with the GitHub repository information.
